@@ -120,22 +120,22 @@ struct ContentView: View {
             }
             .navigationBarItems(trailing:
                                     Menu {
-                                        Button(action: {
-                                            showSettings = true
-                                        }) {
-                                            Label("Configuración", systemImage: "gear")
-                                        }
-                                        
-                                        Button(action: {
-                                            showComments = true
-                                        }) {
-                                            Label("Comentarios", systemImage: "newspaper.fill")
-                                        }
-                                    } label: {
-                                        Image(systemName: "line.3.horizontal")
-                                            .imageScale(.large)
-                                            .foregroundColor(.orange)
-                                    }
+                Button(action: {
+                    showSettings = true
+                }) {
+                    Label("Configuración", systemImage: "gear")
+                }
+                
+                Button(action: {
+                    showComments = true
+                }) {
+                    Label("Comentarios", systemImage: "newspaper.fill")
+                }
+            } label: {
+                Image(systemName: "line.3.horizontal")
+                    .imageScale(.large)
+                    .foregroundColor(.orange)
+            }
             )
             .sheet(isPresented: $showSettings) {
                 SettingsView(
@@ -223,24 +223,45 @@ struct ContentView: View {
     }
     
     private func playCompletionSound() {
-        let systemSoundID: SystemSoundID
+        var systemSoundID: SystemSoundID = 0 // Inicializar con valor nulo
         
         switch selectedSound {
         case .defaultSound:
-            systemSoundID = 1005 // ID del sonido predeterminado
+            systemSoundID = SystemSoundID(1005) // ID del sonido predeterminado
         case .alternativeSound:
-            systemSoundID = 1006 // ID del sonido alternativo
+            systemSoundID = SystemSoundID(1006) // ID del sonido alternativo
         }
         
         if vibrateAndSound {
-            AudioServicesPlayAlertSoundWithCompletion(systemSoundID, nil)
+            switch selectedVibration {
+            case .defaultVibration:
+                // Reproducir el sonido seleccionado por el usuario y la vibración predeterminada
+                AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
+                    AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+                }
+            case .heavyVibration:
+                // Reproducir el sonido seleccionado por el usuario y la vibración intensa
+                AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
+                    // Reproducir la vibración intensa durante un período de tiempo más largo
+                    let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
+                    let endTime = Date().addingTimeInterval(durationInSeconds)
+                    
+                    while Date() < endTime {
+                        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+                        usleep(50000) // Esperar 0.05 segundos entre cada vibración
+                    }
+                }
+            }
         } else if soundOnly {
+            // Reproducir solo el sonido seleccionado por el usuario
             AudioServicesPlaySystemSound(systemSoundID)
         } else if vibrateOnly {
             switch selectedVibration {
             case .defaultVibration:
+                // Reproducir solo la vibración predeterminada
                 AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             case .heavyVibration:
+                // Reproducir la vibración intensa durante un período de tiempo más largo
                 let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
                 let endTime = Date().addingTimeInterval(durationInSeconds)
                 
@@ -251,6 +272,8 @@ struct ContentView: View {
             }
         }
     }
+    
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
