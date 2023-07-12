@@ -24,11 +24,18 @@ struct ContentView: View {
     @State private var vibrateOnly = false
     @State private var soundOnly = false
     
+    
     @State private var selectedSound: SoundType = .defaultSound
+    @State private var selectedVibration: VibrationType = .defaultVibration
     
     enum SoundType {
         case defaultSound
         case alternativeSound
+    }
+    
+    enum VibrationType {
+        case defaultVibration
+        case heavyVibration
     }
     
     var body: some View {
@@ -109,13 +116,13 @@ struct ContentView: View {
                 updateCountdown()
             }
             .navigationBarItems(trailing:
-                Button(action: {
-                    isMenuOpen.toggle()
-                }) {
-                    Image(systemName: "line.3.horizontal")
-                        .imageScale(.large)
-                        .foregroundColor(.orange)
-                }
+                                    Button(action: {
+                isMenuOpen.toggle()
+            }) {
+                Image(systemName: "line.3.horizontal")
+                    .imageScale(.large)
+                    .foregroundColor(.orange)
+            }
             )
             .fullScreenCover(isPresented: $isMenuOpen) {
                 NavigationView {
@@ -139,6 +146,8 @@ struct ContentView: View {
                                     if newValue {
                                         vibrateAndSound = false
                                         soundOnly = false
+                                    } else if !newValue && !soundOnly {
+                                        vibrateAndSound = true
                                     }
                                 }
                                 
@@ -149,11 +158,13 @@ struct ContentView: View {
                                     if newValue {
                                         vibrateAndSound = false
                                         vibrateOnly = false
+                                    } else if !newValue && !vibrateOnly {
+                                        vibrateAndSound = true
                                     }
                                 }
                             }
                             
-                            Section(header: Text("Sonidos")) {
+                            Section(header: Text("Tipo de sonido")) {
                                 HStack {
                                     Text("Sonido predeterminado")
                                     Spacer()
@@ -176,17 +187,41 @@ struct ContentView: View {
                                     selectedSound = .alternativeSound
                                 }
                             }
+                            
+                            Section(header: Text("Tipo de vibración")) {
+                                HStack {
+                                    Text("Vibración predeterminada")
+                                    Spacer()
+                                    if selectedVibration == .defaultVibration {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                                .onTapGesture {
+                                    selectedVibration = .defaultVibration
+                                }
+                                
+                                HStack {
+                                    Text("Vibración intensa")
+                                    Spacer()
+                                    if selectedVibration == .heavyVibration {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                                .onTapGesture {
+                                    selectedVibration = .heavyVibration
+                                }
+                            }
                         }
                         
                         Spacer()
                     }
                     .navigationBarTitle("Configuración")
                     .navigationBarItems(trailing:
-                        Button(action: {
-                            isMenuOpen = false
-                        }) {
-                            Text("Cerrar")
-                        }
+                                            Button(action: {
+                        isMenuOpen = false
+                    }) {
+                        Text("Cerrar")
+                    }
                     )
                 }
             }
@@ -276,11 +311,14 @@ struct ContentView: View {
         } else if soundOnly {
             AudioServicesPlaySystemSound(systemSoundID)
         } else if vibrateOnly {
-            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+            if selectedVibration == .defaultVibration {
+                AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+            } else if selectedVibration == .heavyVibration {
+                AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+            }
         }
     }
 }
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
