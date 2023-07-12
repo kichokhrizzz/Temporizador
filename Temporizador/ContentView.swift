@@ -40,14 +40,8 @@ struct ContentView: View {
                         if isCountingDown {
                             stopCountdown()
                         } else {
-                            let maxVolume = 1.0
-                            let currentVolume = getCurrentVolume()
-                            if currentVolume == Float(maxVolume) {
-                                showMessage = true
-                                startCountdown()
-                            } else {
-                                // Mostrar mensaje de que el volumen no está al máximo
-                            }
+                            showMessage = true
+                            checkVolumeContinuously()
                         }
                     }) {
                         Text(isCountingDown ? "Cancelar" : "Comenzar")
@@ -107,6 +101,17 @@ struct ContentView: View {
         return String(format: "%02d:%02d", minutes, seconds)
     }
     
+    private func checkVolumeContinuously() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            let maxVolume = 1.0
+            let currentVolume = getCurrentVolume()
+            if currentVolume == Float(maxVolume) {
+                timer.invalidate()
+                startCountdown()
+            }
+        }
+    }
+    
     private func getCurrentVolume() -> Float {
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -118,7 +123,6 @@ struct ContentView: View {
         }
     }
 }
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
