@@ -20,6 +20,17 @@ struct ContentView: View {
     @State private var showSettings = false
     @State private var showComments = false
     
+    @State private var vibrateAndSound = true
+    @State private var vibrateOnly = false
+    @State private var soundOnly = false
+    
+    @State private var selectedSound: SoundType = .defaultSound
+    
+    enum SoundType {
+        case defaultSound
+        case alternativeSound
+    }
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -98,31 +109,92 @@ struct ContentView: View {
                 updateCountdown()
             }
             .navigationBarItems(trailing:
-                Menu {
-                    Button(action: {
-                        showSettings = true
-                    }) {
-                        Label("Configuración", systemImage: "gear")
-                    }
-                    
-                    Button(action: {
-                        showComments = true
-                    }) {
-                        Label("Comentarios", systemImage: "newspaper.fill")
-                    }
-                } label: {
+                Button(action: {
+                    isMenuOpen.toggle()
+                }) {
                     Image(systemName: "line.3.horizontal")
                         .imageScale(.large)
                         .foregroundColor(.orange)
                 }
             )
-            .sheet(isPresented: $showSettings) {
-                // Mostrar la pantalla de configuración
-                SettingsView()
+            .fullScreenCover(isPresented: $isMenuOpen) {
+                NavigationView {
+                    VStack {
+                        Form {
+                            Section(header: Text("Configuración")) {
+                                Toggle(isOn: $vibrateAndSound.animation()) {
+                                    Text("Vibrar y Sonar")
+                                }
+                                .onChange(of: vibrateAndSound) { newValue in
+                                    if newValue {
+                                        vibrateOnly = false
+                                        soundOnly = false
+                                    }
+                                }
+                                
+                                Toggle(isOn: $vibrateOnly.animation()) {
+                                    Text("Solo Vibrar")
+                                }
+                                .onChange(of: vibrateOnly) { newValue in
+                                    if newValue {
+                                        vibrateAndSound = false
+                                        soundOnly = false
+                                    }
+                                }
+                                
+                                Toggle(isOn: $soundOnly.animation()) {
+                                    Text("Solo Sonar")
+                                }
+                                .onChange(of: soundOnly) { newValue in
+                                    if newValue {
+                                        vibrateAndSound = false
+                                        vibrateOnly = false
+                                    }
+                                }
+                            }
+                            
+                            Section(header: Text("Sonidos")) {
+                                HStack {
+                                    Text("Sonido predeterminado")
+                                    Spacer()
+                                    if selectedSound == .defaultSound {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                                .onTapGesture {
+                                    selectedSound = .defaultSound
+                                }
+                                
+                                HStack {
+                                    Text("Sonido alternativo")
+                                    Spacer()
+                                    if selectedSound == .alternativeSound {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                                .onTapGesture {
+                                    selectedSound = .alternativeSound
+                                }
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    .navigationBarTitle("Configuración")
+                    .navigationBarItems(trailing:
+                        Button(action: {
+                            isMenuOpen = false
+                        }) {
+                            Text("Cerrar")
+                        }
+                    )
+                }
             }
-            .sheet(isPresented: $showComments) {
-                // Mostrar la pantalla de comentarios
-                CommentsView()
+        }
+        .onChange(of: countdown) { newValue in
+            if newValue <= 0 {
+                stopCountdown()
+                playCompletionSound()
             }
         }
     }
@@ -132,10 +204,6 @@ struct ContentView: View {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
             if !isPaused {
                 countdown -= 1
-                if countdown <= 0 {
-                    stopCountdown()
-                    performVibrationAndSound()
-                }
             }
         }
         showMessage = false // Eliminar el mensaje de "Esperando para iniciar"
@@ -193,25 +261,23 @@ struct ContentView: View {
         }
     }
     
-    private func performVibrationAndSound() {
-        // Vibrar el dispositivo
-        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+    private func playCompletionSound() {
+        let systemSoundID: SystemSoundID
         
-        // Reproducir un sonido
-        let systemSoundID: SystemSoundID = 1005 // Puedes cambiar el valor por el ID de otro sonido
-        AudioServicesPlaySystemSound(systemSoundID)
-    }
-}
-
-struct SettingsView: View {
-    var body: some View {
-        Text("Pantalla de configuración")
-    }
-}
-
-struct CommentsView: View {
-    var body: some View {
-        Text("Pantalla de comentarios")
+        switch selectedSound {
+        case .defaultSound:
+            systemSoundID = 1005 // ID del sonido predeterminado
+        case .alternativeSound:
+            systemSoundID = 1006 // ID del sonido alternativo
+        }
+        
+        if vibrateAndSound {
+            AudioServicesPlayAlertSoundWithCompletion(systemSoundID, nil)
+        } else if soundOnly {
+            AudioServicesPlaySystemSound(systemSoundID)
+        } else if vibrateOnly {
+            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+        }
     }
 }
 
