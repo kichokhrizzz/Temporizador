@@ -8,10 +8,14 @@
 import AVFoundation
 import SwiftUI
 
+import AVFoundation
+import SwiftUI
+
 struct ContentView: View {
     @State private var countdown: TimeInterval = 10 * 60 // 10 minutos en segundos
     @State private var isCountingDown = false
     @State private var showMessage = false
+    @State private var isPaused = false
     @State private var timer: Timer?
     
     var body: some View {
@@ -34,9 +38,37 @@ struct ContentView: View {
                             .padding()
                     }
                     
+                    if isCountingDown {
+                        if isPaused {
+                            Button(action: {
+                                resumeCountdown()
+                            }) {
+                                Text("Reanudar")
+                                    .font(.headline)
+                                    .padding()
+                                    .background(Color.green)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .padding()
+                        } else {
+                            Button(action: {
+                                pauseCountdown()
+                            }) {
+                                Text("Pausar")
+                                    .font(.headline)
+                                    .padding()
+                                    .background(Color.yellow)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .padding()
+                        }
+                    }
+                    
                     Button(action: {
                         if isCountingDown {
-                            stopCountdown()
+                            cancelCountdown()
                         } else {
                             showMessage = true
                             checkVolumeContinuously()
@@ -76,9 +108,11 @@ struct ContentView: View {
     private func startCountdown() {
         isCountingDown = true
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-            countdown -= 1
-            if countdown <= 0 {
-                stopCountdown()
+            if !isPaused {
+                countdown -= 1
+                if countdown <= 0 {
+                    stopCountdown()
+                }
             }
         }
     }
@@ -89,8 +123,21 @@ struct ContentView: View {
         timer = nil
     }
     
-    private func updateCountdown() {
+    private func pauseCountdown() {
+        isPaused = true
+    }
+    
+    private func resumeCountdown() {
+        isPaused = false
+    }
+    
+    private func cancelCountdown() {
         stopCountdown()
+        isPaused = false
+        updateCountdown()
+    }
+    
+    private func updateCountdown() {
         countdown = 10 * 60
     }
     
@@ -122,6 +169,8 @@ struct ContentView: View {
         }
     }
 }
+
+
 
 
 struct ContentView_Previews: PreviewProvider {
