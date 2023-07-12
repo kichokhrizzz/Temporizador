@@ -4,6 +4,8 @@
 //
 //  Created by Jhosel Badillo Cortes on 11/07/23.
 //
+
+
 import AVFoundation
 import AudioToolbox
 import SwiftUI
@@ -160,9 +162,9 @@ struct ContentView: View {
     
     private func startCountdown() {
         isCountingDown = true
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.001, repeats: true) { timer in
             if !isPaused {
-                countdown -= 1
+                countdown -= 0.001
             }
         }
         showMessage = false
@@ -194,9 +196,11 @@ struct ContentView: View {
     }
     
     private func timeFormatted(_ totalSeconds: TimeInterval) -> String {
-        let minutes = Int(totalSeconds) / 60
+        let milliseconds = Int(totalSeconds * 1000) % 1000
         let seconds = Int(totalSeconds) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        let minutes = Int(totalSeconds) / 60
+        
+        return String(format: "%02d:%02d:%03d", minutes, seconds, milliseconds)
     }
     
     private func checkVolumeContinuously() {
@@ -235,21 +239,25 @@ struct ContentView: View {
         if vibrateAndSound {
             switch selectedVibration {
             case .defaultVibration:
+                print("Antes de reproducir la vibración default")
                 // Reproducir el sonido seleccionado por el usuario y la vibración predeterminada
                 AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
                     AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                 }
+                print("Despues de reproducir la vibración default" )
             case .heavyVibration:
                 // Reproducir el sonido seleccionado por el usuario y la vibración intensa
                 AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
+                    
                     // Reproducir la vibración intensa durante un período de tiempo más largo
                     let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
                     let endTime = Date().addingTimeInterval(durationInSeconds)
-                    
+                    print("Antes de reproducir la vibración fuerte")
                     while Date() < endTime {
                         AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                         usleep(50000) // Esperar 0.05 segundos entre cada vibración
                     }
+                    print("Despues de reproducir la vibración fuerte")
                 }
             }
         } else if soundOnly {
@@ -258,22 +266,24 @@ struct ContentView: View {
         } else if vibrateOnly {
             switch selectedVibration {
             case .defaultVibration:
+                print("Antes de reproducir la vibración default")
                 // Reproducir solo la vibración predeterminada
                 AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+                print("Despues de reproducir la vibración default")
             case .heavyVibration:
                 // Reproducir la vibración intensa durante un período de tiempo más largo
                 let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
                 let endTime = Date().addingTimeInterval(durationInSeconds)
+                print("Antes de reproducir la vibración fuerte")
                 
                 while Date() < endTime {
                     AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                     usleep(50000) // Esperar 0.05 segundos entre cada vibración
                 }
+                print("Despues de reproducir la vibración fuerte")
             }
         }
     }
-    
-    
 }
 
 struct ContentView_Previews: PreviewProvider {
