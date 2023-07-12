@@ -4,19 +4,21 @@
 //
 //  Created by Jhosel Badillo Cortes on 11/07/23.
 //
-
 import AVFoundation
-import SwiftUI
-
-import AVFoundation
+import AudioToolbox
 import SwiftUI
 
 struct ContentView: View {
-    @State private var countdown: TimeInterval = 10 * 60 // 10 minutos en segundos
+    @State private var countdown: TimeInterval = 10 // 10 segundos
     @State private var isCountingDown = false
     @State private var showMessage = false
     @State private var isPaused = false
     @State private var timer: Timer?
+    
+    @State private var isMenuOpen = false
+    
+    @State private var showSettings = false
+    @State private var showComments = false
     
     var body: some View {
         NavigationView {
@@ -96,12 +98,32 @@ struct ContentView: View {
                 updateCountdown()
             }
             .navigationBarItems(trailing:
-                Button(action: {
-                    // Acción del botón
-                }) {
+                Menu {
+                    Button(action: {
+                        showSettings = true
+                    }) {
+                        Label("Configuración", systemImage: "gear")
+                    }
+                    
+                    Button(action: {
+                        showComments = true
+                    }) {
+                        Label("Comentarios", systemImage: "newspaper.fill")
+                    }
+                } label: {
                     Image(systemName: "line.3.horizontal")
+                        .imageScale(.large)
+                        .foregroundColor(.orange)
                 }
             )
+            .sheet(isPresented: $showSettings) {
+                // Mostrar la pantalla de configuración
+                SettingsView()
+            }
+            .sheet(isPresented: $showComments) {
+                // Mostrar la pantalla de comentarios
+                CommentsView()
+            }
         }
     }
     
@@ -112,9 +134,11 @@ struct ContentView: View {
                 countdown -= 1
                 if countdown <= 0 {
                     stopCountdown()
+                    performVibrationAndSound()
                 }
             }
         }
+        showMessage = false // Eliminar el mensaje de "Esperando para iniciar"
     }
     
     private func stopCountdown() {
@@ -138,7 +162,7 @@ struct ContentView: View {
     }
     
     private func updateCountdown() {
-        countdown = 10 * 60
+        countdown = 10
     }
     
     private func timeFormatted(_ totalSeconds: TimeInterval) -> String {
@@ -168,9 +192,28 @@ struct ContentView: View {
             return 0.0
         }
     }
+    
+    private func performVibrationAndSound() {
+        // Vibrar el dispositivo
+        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+        
+        // Reproducir un sonido
+        let systemSoundID: SystemSoundID = 1005 // Puedes cambiar el valor por el ID de otro sonido
+        AudioServicesPlaySystemSound(systemSoundID)
+    }
 }
 
+struct SettingsView: View {
+    var body: some View {
+        Text("Pantalla de configuración")
+    }
+}
 
+struct CommentsView: View {
+    var body: some View {
+        Text("Pantalla de comentarios")
+    }
+}
 
 
 struct ContentView_Previews: PreviewProvider {
