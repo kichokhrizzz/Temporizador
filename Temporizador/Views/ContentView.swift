@@ -4,8 +4,6 @@
 //
 //  Created by Jhosel Badillo Cortes on 11/07/23.
 //
-
-
 import AVFoundation
 import AudioToolbox
 import SwiftUI
@@ -16,6 +14,7 @@ struct ContentView: View {
     @State private var showMessage = false
     @State private var isPaused = false
     @State private var timer: Timer?
+    @State private var timers: [Timer] = [] // Array para almacenar todas las instancias de Timer
     
     @State private var isMenuOpen = false
     
@@ -27,6 +26,7 @@ struct ContentView: View {
     @State private var soundOnly = false
     
     @State private var isCancelButton = false // Agregada variable para controlar el estado del botón
+    @State private var isTimerRunning = false // Variable para rastrear si el temporizador está en ejecución
     
     @State private var selectedSound: SoundType = .defaultSound
     @State private var selectedVibration: VibrationType = .defaultVibration
@@ -156,24 +156,36 @@ struct ContentView: View {
             if newValue <= 0 {
                 stopCountdown()
                 playCompletionSound()
+                cancelAllTimers()
             }
         }
     }
     
     private func startCountdown() {
         isCountingDown = true
-        timer = Timer.scheduledTimer(withTimeInterval: 0.001, repeats: true) { timer in
-            if !isPaused {
-                countdown -= 0.001
+        
+        if countdown > 0 { // Verificar si el tiempo restante es mayor que 0
+            timer = Timer.scheduledTimer(withTimeInterval: 0.001, repeats: true) { timer in
+                if !isPaused {
+                    countdown -= 0.001
+                }
             }
+            timers.append(timer!) // Agregar el timer al array de timers
+        } else {
+            stopCountdown()
+            playCompletionSound()
+            cancelAllTimers()
         }
+        
         showMessage = false
+        isTimerRunning = true // Indicar que el temporizador está en ejecución
     }
     
     private func stopCountdown() {
         isCountingDown = false
         timer?.invalidate()
         timer = nil
+        isTimerRunning = false // Indicar que el temporizador ha finalizado
     }
     
     private func pauseCountdown() {
@@ -189,6 +201,15 @@ struct ContentView: View {
         isPaused = false
         updateCountdown()
         isCancelButton = false // Volver al flujo inicial de la aplicación
+        cancelAllTimers()
+    }
+    
+    private func cancelAllTimers() {
+        for timer in timers {
+            timer.invalidate() // Invalidar cada timer
+        }
+        
+        timers.removeAll() // Limpiar el array de timers
     }
     
     private func updateCountdown() {
@@ -213,6 +234,7 @@ struct ContentView: View {
                 isCancelButton = true // Cambiar el estado del botón a "Cancelar"
             }
         }
+        timers.append(timer!) // Agregar el timer al array de timers
     }
     
     private func getCurrentVolume() -> Float {
