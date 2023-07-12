@@ -7,7 +7,7 @@ import AudioToolbox
 import SwiftUI
 
 struct ContentView: View {
-    @State private var countdown: TimeInterval = 10 // 10 segundos
+    @State private var countdown: TimeInterval = 60 // 10 segundos
     @State private var isCountingDown = false
     @State private var showMessage = false
     @State private var isPaused = false
@@ -219,7 +219,7 @@ struct ContentView: View {
     }
     
     private func updateCountdown() {
-        countdown = 10
+        countdown = 60
     }
     
     private func timeFormatted(_ totalSeconds: TimeInterval) -> String {
