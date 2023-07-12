@@ -11,6 +11,8 @@
 		8E3B0F592A5E578200B639BA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3B0F582A5E578200B639BA /* ContentView.swift */; };
 		8E3B0F5B2A5E578300B639BA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E3B0F5A2A5E578300B639BA /* Assets.xcassets */; };
 		8E3B0F5E2A5E578300B639BA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E3B0F5D2A5E578300B639BA /* Preview Assets.xcassets */; };
+		8E41B44D2A5F032D000A7FD6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E41B44C2A5F032D000A7FD6 /* SettingsView.swift */; };
+		8E41B44F2A5F0347000A7FD6 /* CommentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E41B44E2A5F0347000A7FD6 /* CommentsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +21,8 @@
 		8E3B0F582A5E578200B639BA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8E3B0F5A2A5E578300B639BA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8E3B0F5D2A5E578300B639BA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8E41B44C2A5F032D000A7FD6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		8E41B44E2A5F0347000A7FD6 /* CommentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,8 +55,8 @@
 		8E3B0F552A5E578200B639BA /* Temporizador */ = {
 			isa = PBXGroup;
 			children = (
+				8E41B4502A5F0354000A7FD6 /* Views */,
 				8E3B0F562A5E578200B639BA /* TemporizadorApp.swift */,
-				8E3B0F582A5E578200B639BA /* ContentView.swift */,
 				8E3B0F5A2A5E578300B639BA /* Assets.xcassets */,
 				8E3B0F5C2A5E578300B639BA /* Preview Content */,
 			);
@@ -65,6 +69,16 @@
 				8E3B0F5D2A5E578300B639BA /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		8E41B4502A5F0354000A7FD6 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8E41B44C2A5F032D000A7FD6 /* SettingsView.swift */,
+				8E3B0F582A5E578200B639BA /* ContentView.swift */,
+				8E41B44E2A5F0347000A7FD6 /* CommentsView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -137,7 +151,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E41B44D2A5F032D000A7FD6 /* SettingsView.swift in Sources */,
 				8E3B0F592A5E578200B639BA /* ContentView.swift in Sources */,
+				8E41B44F2A5F0347000A7FD6 /* CommentsView.swift in Sources */,
 				8E3B0F572A5E578200B639BA /* TemporizadorApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
