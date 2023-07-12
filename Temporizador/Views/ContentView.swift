@@ -1,9 +1,3 @@
-//
-//  ContentView.swift
-//  Temporizador
-//
-//  Created by Jhosel Badillo Cortes on 11/07/23.
-//
 import AVFoundation
 import AudioToolbox
 import SwiftUI
@@ -59,6 +53,18 @@ struct ContentView: View {
                             .foregroundColor(Color.white)
                             .font(.headline)
                             .padding()
+                        
+                        Button(action: {
+                            resetFlow()
+                        }) {
+                            Text("Cancelar")
+                                .font(.headline)
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding()
                     }
                     
                     if isCountingDown {
@@ -89,28 +95,28 @@ struct ContentView: View {
                         }
                     }
                     
-                    Button(action: {
-                        if isCountingDown {
-                            cancelCountdown()
-                        } else {
-                            showMessage = true
-                            isCancelButton = true
-                            checkVolumeContinuously()
+                    if !showMessage {
+                        Button(action: {
+                            if isCountingDown {
+                                cancelCountdown()
+                            } else {
+                                showMessage = true
+                                isCancelButton = true
+                                checkVolumeContinuously()
+                            }
+                        }) {
+                            Text(isCancelButton ? "Cancelar" : "Comenzar") // Cambio de etiqueta del botón
+                                .font(.headline)
+                                .padding()
+                                .background(isCancelButton ? Color.red : Color("orange")) // Cambio de color del botón
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
                         }
-                    }) {
-                        Text(isCancelButton ? "Cancelar" : "Comenzar") // Cambio de etiqueta del botón
-                            .font(.headline)
-                            .padding()
-                            .background(isCancelButton ? Color.red : Color("orange")) // Cambio de color del botón
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .padding()
-                    .onChange(of: isCountingDown) { newValue in
-                        if !newValue {
-                            showMessage = false
-                            updateCountdown()
-                            isCancelButton = false // Volver al flujo inicial de la aplicación
+                        .padding()
+                        .onChange(of: isCancelButton) { newValue in
+                            if newValue == false {
+                                resetFlow() // Reiniciar el flujo de la aplicación
+                            }
                         }
                     }
                     
@@ -210,6 +216,14 @@ struct ContentView: View {
         }
         
         timers.removeAll() // Limpiar el array de timers
+    }
+    
+    private func resetFlow() {
+        stopCountdown()
+        isPaused = false
+        updateCountdown()
+        showMessage = false
+        isCancelButton = false // Volver al flujo inicial de la aplicación
     }
     
     private func updateCountdown() {
@@ -313,3 +327,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
