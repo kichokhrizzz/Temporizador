@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+import AVFoundation
+import SwiftUI
+
 struct ContentView: View {
     @State private var countdown: TimeInterval = 10 * 60 // 10 minutos en segundos
     @State private var isCountingDown = false
@@ -37,11 +40,17 @@ struct ContentView: View {
                         if isCountingDown {
                             stopCountdown()
                         } else {
-                            startCountdown()
-                            showMessage = true
+                            let maxVolume = 1.0
+                            let currentVolume = getCurrentVolume()
+                            if currentVolume == Float(maxVolume) {
+                                showMessage = true
+                                startCountdown()
+                            } else {
+                                // Mostrar mensaje de que el volumen no está al máximo
+                            }
                         }
                     }) {
-                        Text(isCountingDown ? "Cancelar" : "Botón")
+                        Text(isCountingDown ? "Cancelar" : "Comenzar")
                             .font(.headline)
                             .padding()
                             .background(isCountingDown ? Color.red : Color("orange"))
@@ -96,6 +105,17 @@ struct ContentView: View {
         let minutes = Int(totalSeconds) / 60
         let seconds = Int(totalSeconds) % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+    
+    private func getCurrentVolume() -> Float {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setActive(true)
+            return audioSession.outputVolume
+        } catch {
+            print("Error al obtener el nivel de volumen: \(error.localizedDescription)")
+            return 0.0
+        }
     }
 }
 
