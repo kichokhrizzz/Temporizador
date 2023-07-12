@@ -311,10 +311,18 @@ struct ContentView: View {
         } else if soundOnly {
             AudioServicesPlaySystemSound(systemSoundID)
         } else if vibrateOnly {
-            if selectedVibration == .defaultVibration {
+            switch selectedVibration {
+            case .defaultVibration:
                 AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-            } else if selectedVibration == .heavyVibration {
-                AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+            case .heavyVibration:
+                // Reproducir la vibración intensa por un período de tiempo más largo
+                let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
+                let endTime = Date().addingTimeInterval(durationInSeconds)
+                
+                while Date() < endTime {
+                    AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+                    usleep(50000) // Esperar 0.05 segundos entre cada vibración
+                }
             }
         }
     }
