@@ -24,6 +24,7 @@ struct ContentView: View {
     @State private var vibrateOnly = false
     @State private var soundOnly = false
     
+    @State private var isCancelButton = false // Agregada variable para controlar el estado del botón
     
     @State private var selectedSound: SoundType = .defaultSound
     @State private var selectedVibration: VibrationType = .defaultVibration
@@ -58,61 +59,57 @@ struct ContentView: View {
                             .padding()
                     }
                     
-                    if showMessage || isCountingDown {
-                        HStack {
-                            if isCountingDown {
-                                if isPaused {
-                                    Button(action: {
-                                        resumeCountdown()
-                                    }) {
-                                        Text("Reanudar")
-                                            .font(.headline)
-                                            .padding()
-                                            .background(Color.green)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                    }
-                                    .padding()
-                                } else {
-                                    Button(action: {
-                                        pauseCountdown()
-                                    }) {
-                                        Text("Pausar")
-                                            .font(.headline)
-                                            .padding()
-                                            .background(Color.yellow)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                    }
-                                    .padding()
-                                }
-                            }
-                            
+                    if isCountingDown {
+                        if isPaused {
                             Button(action: {
-                                cancelCountdown()
+                                resumeCountdown()
                             }) {
-                                Text("Cancelar")
+                                Text("Reanudar")
                                     .font(.headline)
                                     .padding()
-                                    .background(Color.red)
+                                    .background(Color.green)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                            .padding()
+                        } else {
+                            Button(action: {
+                                pauseCountdown()
+                            }) {
+                                Text("Pausar")
+                                    .font(.headline)
+                                    .padding()
+                                    .background(Color.yellow)
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
                             }
                             .padding()
                         }
-                    } else {
-                        Button(action: {
+                    }
+                    
+                    Button(action: {
+                        if isCountingDown {
+                            cancelCountdown()
+                        } else {
                             showMessage = true
+                            isCancelButton = true
                             checkVolumeContinuously()
-                        }) {
-                            Text("Comenzar")
-                                .font(.headline)
-                                .padding()
-                                .background(Color("orange"))
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
                         }
-                        .padding()
+                    }) {
+                        Text(isCancelButton ? "Cancelar" : "Comenzar") // Cambio de etiqueta del botón
+                            .font(.headline)
+                            .padding()
+                            .background(isCancelButton ? Color.red : Color("orange")) // Cambio de color del botón
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                    .onChange(of: isCountingDown) { newValue in
+                        if !newValue {
+                            showMessage = false
+                            updateCountdown()
+                            isCancelButton = false // Volver al flujo inicial de la aplicación
+                        }
                     }
                     
                     Spacer()
@@ -122,114 +119,35 @@ struct ContentView: View {
                 updateCountdown()
             }
             .navigationBarItems(trailing:
-                                    Button(action: {
-                isMenuOpen.toggle()
-            }) {
-                Image(systemName: "line.3.horizontal")
-                    .imageScale(.large)
-                    .foregroundColor(.orange)
-            }
+                                    Menu {
+                                        Button(action: {
+                                            showSettings = true
+                                        }) {
+                                            Label("Configuración", systemImage: "gear")
+                                        }
+                                        
+                                        Button(action: {
+                                            showComments = true
+                                        }) {
+                                            Label("Comentarios", systemImage: "newspaper.fill")
+                                        }
+                                    } label: {
+                                        Image(systemName: "line.3.horizontal")
+                                            .imageScale(.large)
+                                            .foregroundColor(.orange)
+                                    }
             )
-            .fullScreenCover(isPresented: $isMenuOpen) {
-                NavigationView {
-                    VStack {
-                        Form {
-                            Section(header: Text("Configuración")) {
-                                Toggle(isOn: $vibrateAndSound.animation()) {
-                                    Text("Vibrar y Sonar")
-                                }
-                                .onChange(of: vibrateAndSound) { newValue in
-                                    if newValue {
-                                        vibrateOnly = false
-                                        soundOnly = false
-                                    }
-                                }
-                                
-                                Toggle(isOn: $vibrateOnly.animation()) {
-                                    Text("Solo Vibrar")
-                                }
-                                .onChange(of: vibrateOnly) { newValue in
-                                    if newValue {
-                                        vibrateAndSound = false
-                                        soundOnly = false
-                                    } else if !newValue && !soundOnly {
-                                        vibrateAndSound = true
-                                    }
-                                }
-                                
-                                Toggle(isOn: $soundOnly.animation()) {
-                                    Text("Solo Sonar")
-                                }
-                                .onChange(of: soundOnly) { newValue in
-                                    if newValue {
-                                        vibrateAndSound = false
-                                        vibrateOnly = false
-                                    } else if !newValue && !vibrateOnly {
-                                        vibrateAndSound = true
-                                    }
-                                }
-                            }
-                            
-                            Section(header: Text("Tipo de sonido")) {
-                                HStack {
-                                    Text("Sonido predeterminado")
-                                    Spacer()
-                                    if selectedSound == .defaultSound {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                                .onTapGesture {
-                                    selectedSound = .defaultSound
-                                }
-                                
-                                HStack {
-                                    Text("Sonido alternativo")
-                                    Spacer()
-                                    if selectedSound == .alternativeSound {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                                .onTapGesture {
-                                    selectedSound = .alternativeSound
-                                }
-                            }
-                            
-                            Section(header: Text("Tipo de vibración")) {
-                                HStack {
-                                    Text("Vibración predeterminada")
-                                    Spacer()
-                                    if selectedVibration == .defaultVibration {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                                .onTapGesture {
-                                    selectedVibration = .defaultVibration
-                                }
-                                
-                                HStack {
-                                    Text("Vibración intensa")
-                                    Spacer()
-                                    if selectedVibration == .heavyVibration {
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                                .onTapGesture {
-                                    selectedVibration = .heavyVibration
-                                }
-                            }
-                        }
-                        
-                        Spacer()
-                    }
-                    .navigationBarTitle("Configuración")
-                    .navigationBarItems(trailing:
-                                            Button(action: {
-                        isMenuOpen = false
-                    }) {
-                        Text("Cerrar")
-                    }
-                    )
-                }
+            .sheet(isPresented: $showSettings) {
+                SettingsView(
+                    vibrateAndSound: $vibrateAndSound,
+                    vibrateOnly: $vibrateOnly,
+                    soundOnly: $soundOnly,
+                    selectedSound: $selectedSound,
+                    selectedVibration: $selectedVibration
+                )
+            }
+            .sheet(isPresented: $showComments) {
+                CommentsView()
             }
         }
         .onChange(of: countdown) { newValue in
@@ -247,7 +165,7 @@ struct ContentView: View {
                 countdown -= 1
             }
         }
-        showMessage = false // Eliminar el mensaje de "Esperando para iniciar"
+        showMessage = false
     }
     
     private func stopCountdown() {
@@ -268,6 +186,7 @@ struct ContentView: View {
         stopCountdown()
         isPaused = false
         updateCountdown()
+        isCancelButton = false // Volver al flujo inicial de la aplicación
     }
     
     private func updateCountdown() {
@@ -287,6 +206,7 @@ struct ContentView: View {
             if currentVolume == Float(maxVolume) {
                 timer.invalidate()
                 startCountdown()
+                isCancelButton = true // Cambiar el estado del botón a "Cancelar"
             }
         }
     }
@@ -313,35 +233,14 @@ struct ContentView: View {
         }
         
         if vibrateAndSound {
-            switch selectedVibration {
-            case .defaultVibration:
-                // Reproducir sonido predeterminado y vibración predeterminada
-                AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
-                    AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-                }
-            case .heavyVibration:
-                // Reproducir sonido predeterminado y vibración intensa
-                AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
-                    // Reproducir la vibración intensa por un período de tiempo más largo
-                    let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
-                    let endTime = Date().addingTimeInterval(durationInSeconds)
-                    
-                    while Date() < endTime {
-                        AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-                        usleep(50000) // Esperar 0.05 segundos entre cada vibración
-                    }
-                }
-            }
+            AudioServicesPlayAlertSoundWithCompletion(systemSoundID, nil)
         } else if soundOnly {
-            // Reproducir solo el sonido
             AudioServicesPlaySystemSound(systemSoundID)
         } else if vibrateOnly {
             switch selectedVibration {
             case .defaultVibration:
-                // Reproducir solo la vibración predeterminada
                 AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             case .heavyVibration:
-                // Reproducir la vibración intensa por un período de tiempo más largo
                 let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
                 let endTime = Date().addingTimeInterval(durationInSeconds)
                 
@@ -352,10 +251,7 @@ struct ContentView: View {
             }
         }
     }
-    
-    
 }
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
