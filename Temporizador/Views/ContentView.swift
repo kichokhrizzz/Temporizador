@@ -2,6 +2,10 @@ import AVFoundation
 import AudioToolbox
 import SwiftUI
 
+import AVFoundation
+import AudioToolbox
+import SwiftUI
+
 struct ContentView: View {
     @State private var countdown: TimeInterval = 10 // 10 segundos
     @State private var isCountingDown = false
@@ -53,18 +57,6 @@ struct ContentView: View {
                             .foregroundColor(Color.white)
                             .font(.headline)
                             .padding()
-                        
-                        Button(action: {
-                            resetFlow()
-                        }) {
-                            Text("Cancelar")
-                                .font(.headline)
-                                .padding()
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                        .padding()
                     }
                     
                     if isCountingDown {
@@ -95,28 +87,26 @@ struct ContentView: View {
                         }
                     }
                     
-                    if !showMessage {
-                        Button(action: {
-                            if isCountingDown {
-                                cancelCountdown()
-                            } else {
-                                showMessage = true
-                                isCancelButton = true
-                                checkVolumeContinuously()
-                            }
-                        }) {
-                            Text(isCancelButton ? "Cancelar" : "Comenzar") // Cambio de etiqueta del botón
-                                .font(.headline)
-                                .padding()
-                                .background(isCancelButton ? Color.red : Color("orange")) // Cambio de color del botón
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
+                    Button(action: {
+                        if isCountingDown {
+                            cancelCountdown()
+                        } else {
+                            showMessage = true
+                            isCancelButton = true
+                            checkVolumeContinuously()
                         }
-                        .padding()
-                        .onChange(of: isCancelButton) { newValue in
-                            if newValue == false {
-                                resetFlow() // Reiniciar el flujo de la aplicación
-                            }
+                    }) {
+                        Text(isCancelButton ? "Cancelar" : "Comenzar") // Cambio de etiqueta del botón
+                            .font(.headline)
+                            .padding()
+                            .background(isCancelButton ? Color.red : Color("orange")) // Cambio de color del botón
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding()
+                    .onChange(of: isCancelButton) { newValue in
+                        if newValue == false {
+                            resetFlow() // Reiniciar el flujo de la aplicación
                         }
                     }
                     
@@ -127,23 +117,23 @@ struct ContentView: View {
                 updateCountdown()
             }
             .navigationBarItems(trailing:
-                                    Menu {
-                Button(action: {
-                    showSettings = true
-                }) {
-                    Label("Configuración", systemImage: "gear")
+                Menu {
+                    Button(action: {
+                        showSettings = true
+                    }) {
+                        Label("Configuración", systemImage: "gear")
+                    }
+                    
+                    Button(action: {
+                        showComments = true
+                    }) {
+                        Label("Comentarios", systemImage: "newspaper.fill")
+                    }
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                        .imageScale(.large)
+                        .foregroundColor(.orange)
                 }
-                
-                Button(action: {
-                    showComments = true
-                }) {
-                    Label("Comentarios", systemImage: "newspaper.fill")
-                }
-            } label: {
-                Image(systemName: "line.3.horizontal")
-                    .imageScale(.large)
-                    .foregroundColor(.orange)
-            }
             )
             .sheet(isPresented: $showSettings) {
                 SettingsView(
@@ -163,6 +153,7 @@ struct ContentView: View {
                 stopCountdown()
                 playCompletionSound()
                 cancelAllTimers()
+                isCancelButton = false // Restablecer el estado del botón
             }
         }
     }
@@ -181,6 +172,7 @@ struct ContentView: View {
             stopCountdown()
             playCompletionSound()
             cancelAllTimers()
+            isCancelButton = false // Restablecer el estado del botón
         }
         
         showMessage = false
@@ -280,7 +272,7 @@ struct ContentView: View {
                 AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
                     AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                 }
-                print("Despues de reproducir la vibración default" )
+                print("Después de reproducir la vibración default")
             case .heavyVibration:
                 // Reproducir el sonido seleccionado por el usuario y la vibración intensa
                 AudioServicesPlayAlertSoundWithCompletion(systemSoundID) {
@@ -293,7 +285,7 @@ struct ContentView: View {
                         AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                         usleep(50000) // Esperar 0.05 segundos entre cada vibración
                     }
-                    print("Despues de reproducir la vibración fuerte")
+                    print("Después de reproducir la vibración fuerte")
                 }
             }
         } else if soundOnly {
@@ -305,7 +297,7 @@ struct ContentView: View {
                 print("Antes de reproducir la vibración default")
                 // Reproducir solo la vibración predeterminada
                 AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-                print("Despues de reproducir la vibración default")
+                print("Después de reproducir la vibración default")
             case .heavyVibration:
                 // Reproducir la vibración intensa durante un período de tiempo más largo
                 let durationInSeconds: TimeInterval = 2.0 // Duración de la vibración en segundos
@@ -316,7 +308,7 @@ struct ContentView: View {
                     AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
                     usleep(50000) // Esperar 0.05 segundos entre cada vibración
                 }
-                print("Despues de reproducir la vibración fuerte")
+                print("Después de reproducir la vibración fuerte")
             }
         }
     }
@@ -327,4 +319,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
