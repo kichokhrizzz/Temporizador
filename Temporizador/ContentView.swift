@@ -5,8 +5,6 @@
 //  Created by Jhosel Badillo Cortes on 11/07/23.
 //
 
-import SwiftUI
-
 import AVFoundation
 import SwiftUI
 
@@ -92,6 +90,7 @@ struct ContentView: View {
     }
     
     private func updateCountdown() {
+        stopCountdown()
         countdown = 10 * 60
     }
     
@@ -123,6 +122,7 @@ struct ContentView: View {
         }
     }
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
