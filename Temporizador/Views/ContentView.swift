@@ -53,7 +53,7 @@ struct ContentView: View {
                         .padding()
                     
                     if showMessage {
-                        Text("Configurada. Esperando para iniciar")
+                        Text("Configurada. Esperando para iniciar. El dispositivo debe tener su volumen al maximo ")
                             .foregroundColor(Color.white)
                             .font(.headline)
                             .padding()
