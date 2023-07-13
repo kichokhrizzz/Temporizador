@@ -7,7 +7,7 @@ import AudioToolbox
 import SwiftUI
 
 struct ContentView: View {
-    @State private var countdown: TimeInterval = 60 // 10 segundos
+    @State private var countdown: TimeInterval = 60 // 1 minuto o 60 segundos
     @State private var isCountingDown = false
     @State private var showMessage = false
     @State private var isPaused = false
@@ -23,7 +23,7 @@ struct ContentView: View {
     @State private var vibrateOnly = false
     @State private var soundOnly = false
     
-    @State private var isCancelButton = false // Agregada variable para controlar el estado del botón
+    @State private var isCancelButton = false // Variable para controlar el estado del botón
     @State private var isTimerRunning = false // Variable para rastrear si el temporizador está en ejecución
     
     @State private var selectedSound: SoundType = .defaultSound
@@ -96,10 +96,10 @@ struct ContentView: View {
                             checkVolumeContinuously()
                         }
                     }) {
-                        Text(isCancelButton ? "Cancelar" : "Comenzar") // Cambio de etiqueta del botón
+                        Text(isCancelButton ? "Cancelar" : "Aceptar") // Cambio de etiqueta del botón
                             .font(.headline)
                             .padding()
-                            .background(isCancelButton ? Color.red : Color("orange")) // Cambio de color del botón
+                            .background(isCancelButton ? Color.red : Color("orange"))
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }

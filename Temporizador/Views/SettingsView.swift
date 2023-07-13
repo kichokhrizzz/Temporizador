@@ -24,6 +24,7 @@ struct SettingsView: View {
                     if newValue {
                         vibrateOnly = false
                         soundOnly = false
+                        
                     }
                 }
                 
